@@ -240,9 +240,10 @@ public class ShopServlet extends HttpServlet {
         }
         s.setAttribute("pendingOrder", orderId);
         s.setAttribute("pendingTable", itemsTable(c));
-        String base = req.getScheme() + "://" + req.getServerName()
-                + (req.getServerPort() == 80 || req.getServerPort() == 443 ? "" : ":" + req.getServerPort())
-                + req.getContextPath();
+        String proto = req.getHeader("X-Forwarded-Proto"), host = req.getHeader("X-Forwarded-Host");
+        if (host == null) host = req.getHeader("Host");
+        if (proto == null) proto = req.getScheme();
+        String base = proto.split(",")[0].trim() + "://" + host.split(",")[0].trim() + req.getContextPath();
         // Amount is in USD in the cart; VNPay needs VND * 100. Assume 1 USD = 25000 VND.
         long vnd = Math.round(amount * 25000) * 100;
         TreeMap<String, String> p = new TreeMap<>();
